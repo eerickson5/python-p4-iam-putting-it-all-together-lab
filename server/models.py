@@ -12,6 +12,8 @@ class User(db.Model, SerializerMixin):
     image_url = db.Column(db.String)
     bio = db.Column(db.String)
 
+    recipes = db.relationship("Recipe", back_populates="user")
+
     @hybrid_property
     def password_hash(self):
         raise Exception("Cannot access password hash.")
@@ -25,4 +27,10 @@ class User(db.Model, SerializerMixin):
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = 'recipes'
     
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    instructions = db.Column(db.String, db.CheckConstraint("len(instructions) >= 50"), nullable=False )
+    minutes_to_complete = db.Column(db.Integer)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship("User", back_populates='recipes')
