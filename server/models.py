@@ -29,7 +29,7 @@ class Recipe(db.Model, SerializerMixin):
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
-    instructions = db.Column(db.String, db.CheckConstraint("len(instructions) >= 50"), nullable=False )
+    instructions = db.Column(db.String, db.CheckConstraint("LENGTH(instructions) > 49"), nullable=False )
     minutes_to_complete = db.Column(db.Integer)
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
