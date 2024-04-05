@@ -51,7 +51,13 @@ class Logout(Resource):
             return make_response({"message": "Not logged in"}, 401)
 
 class RecipeIndex(Resource):
-    pass
+    def get(self):
+        if session["user_id"]:
+            recipes = [rec.to_dict() for rec in Recipe.query.all()]
+            return make_response(recipes, 200)
+        else:
+            return make_response({"error": "Not logged in"}, 401)
+
 
 api.add_resource(Signup, '/signup', endpoint='signup')
 api.add_resource(CheckSession, '/check_session', endpoint='check_session')
