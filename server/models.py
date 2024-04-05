@@ -17,13 +17,16 @@ class User(db.Model, SerializerMixin):
 
     serialize_only = ('id','username', 'image_url','bio')
 
-    @validates('username', 'password', "image_url", 'bio')
+    @validates("username", 'password', "image_url", 'bio')
     def validates_all(self, key, address):
         if address:
             if len(address) > 1:
                 return address
             else:
                 raise ValueError(f"{key} too short")
+        elif key == "username":
+            raise ValueError("No username given")
+
 
     @hybrid_property
     def password_hash(self):
@@ -50,3 +53,11 @@ class Recipe(db.Model, SerializerMixin):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship("User", back_populates='recipes')
+
+    @validates('instructions')
+    def validates_all(self, key, address):
+        if address:
+            if len(address) >= 50:
+                return address
+            else:
+                raise ValueError(f"{key} too short")

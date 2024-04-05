@@ -53,10 +53,28 @@ class Logout(Resource):
 class RecipeIndex(Resource):
     def get(self):
         if session["user_id"]:
-            recipes = [rec.to_dict() for rec in Recipe.query.all()]
+            recipes = [rec.to_dict() for rec in Recipe.query.filter(Recipe.user_id == session["user_id"]).all()]
             return make_response(recipes, 200)
         else:
             return make_response({"error": "Not logged in"}, 401)
+        
+    def post(self):
+        if session["user_id"]:
+            try:
+                recipe = Recipe(
+                    title=request.json.get("title"),
+                    instructions=request.json.get("instructions"),
+                    minutes_to_complete=request.json.get("minutes_to_complete"),
+                    user_id=session["user_id"]
+                )
+                db.session.add(recipe)
+                db.session.commit()
+                return make_response(recipe.to_dict(), 201)
+            except ValueError as e:
+                return make_response( {"message": e}, 422)
+        else:
+            return make_response({"error": "Not logged in"}, 401)
+
 
 
 api.add_resource(Signup, '/signup', endpoint='signup')
