@@ -71,7 +71,7 @@ class RecipeIndex(Resource):
                 db.session.commit()
                 return make_response(recipe.to_dict(), 201)
             except ValueError as e:
-                return make_response( {"message": e}, 422)
+                return make_response( {"message": str(e)}, 422)
         else:
             return make_response({"error": "Not logged in"}, 401)
 
