@@ -16,9 +16,9 @@ class Signup(Resource):
                 bio=request.json.get("bio")
             )
 
+            user.password_hash= request.json.get("password")
             db.session.add(user)
             db.session.commit()
-            user.password_hash= request.json.get("password")
             session["user_id"] = user.id
             return make_response(user.to_dict(), 201)
         except ValueError as e:
@@ -26,17 +26,29 @@ class Signup(Resource):
 
 class CheckSession(Resource):
     def get(self):
-        if session["user_id"]:
+        if session.get("user_id"):
             user = User.query.filter(User.id == session["user_id"]).first()
             return make_response(user.to_dict(), 200)
         else:
             return make_response({"message": "No user logged in"}, 401)
 
 class Login(Resource):
-    pass
+    def post(self):
+        user = User.query.filter(User.username == request.json.get("username")).first()
+        if user and user.authenticate(request.json.get("password")):
+            session["user_id"] = user.id
+            return make_response(user.to_dict(), 200)
+        else:
+            return make_response({"error": "Invalid credentials."}, 401)
+    
 
 class Logout(Resource):
-    pass
+    def delete(self):
+        if session.get("user_id"):
+            session["user_id"] = None
+            return make_response({}, 204)
+        else:
+            return make_response({"message": "Not logged in"}, 401)
 
 class RecipeIndex(Resource):
     pass

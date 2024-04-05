@@ -17,20 +17,13 @@ class User(db.Model, SerializerMixin):
 
     serialize_only = ('id','username', 'image_url','bio')
 
-    @validates('username', 'password')
-    def validate_username_password(self, key, address):
-        if len(address) > 1:
-            return address
-        else:
-            raise ValueError(f"{key} too short")
-    
-        
-    @validates("image_url", 'bio')
-    def validate_image_bio(self, key, address):
-        if len(address) > 1:
-            return address
-        else:
-            raise ValueError(f"{key} too short")
+    @validates('username', 'password', "image_url", 'bio')
+    def validates_all(self, key, address):
+        if address:
+            if len(address) > 1:
+                return address
+            else:
+                raise ValueError(f"{key} too short")
 
     @hybrid_property
     def password_hash(self):
@@ -40,6 +33,11 @@ class User(db.Model, SerializerMixin):
     def password_hash(self, pw):
         pw_hash = bcrypt.generate_password_hash(pw.encode("utf-8"))
         self._password_hash = pw_hash.decode("utf-8")
+        # db.session.add(self)
+        # db.session.commit()
+
+    def authenticate(self, pw):
+        return bcrypt.check_password_hash(self._password_hash, pw.encode("utf-8"))
 
 
 class Recipe(db.Model, SerializerMixin):
